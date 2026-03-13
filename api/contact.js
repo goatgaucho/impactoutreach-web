@@ -13,7 +13,11 @@ export default async function handler(req, res) {
   const MAILGUN_DOMAIN = process.env.MAILGUN_DOMAIN || "mail.impactoutreach.co";
   const FORWARD_TO = process.env.CONTACT_FORWARD_TO || "tectonlabs.ca@gmail.com";
 
-  const body = [
+  if (!MAILGUN_API_KEY) {
+    return res.status(500).json({ error: "Mailgun API key not configured" });
+  }
+
+  const bodyText = [
     `Name: ${name}`,
     `Organization: ${organization || "N/A"}`,
     `Email: ${email}`,
@@ -27,8 +31,10 @@ export default async function handler(req, res) {
   formData.append("from", `ImpactOutreach Contact <contact@${MAILGUN_DOMAIN}>`);
   formData.append("to", FORWARD_TO);
   formData.append("subject", `New inquiry from ${name} — ${organization || "No org"}`);
-  formData.append("text", body);
+  formData.append("text", bodyText);
   formData.append("h:Reply-To", email);
+
+  const authString = Buffer.from(`api:${MAILGUN_API_KEY}`).toString("base64");
 
   try {
     const response = await fetch(
@@ -36,7 +42,7 @@ export default async function handler(req, res) {
       {
         method: "POST",
         headers: {
-          Authorization: "Basic " + btoa(`api:${MAILGUN_API_KEY}`),
+          Authorization: `Basic ${authString}`,
         },
         body: formData,
       }
@@ -44,13 +50,13 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const text = await response.text();
-      console.error("Mailgun error:", text);
-      return res.status(500).json({ error: "Failed to send message" });
+      console.error("Mailgun error:", response.status, text);
+      return res.status(500).json({ error: "Failed to send message", detail: text });
     }
 
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error("Contact form error:", err);
-    return res.status(500).json({ error: "Failed to send message" });
+    return res.status(500).json({ error: "Failed to send message", detail: err.message });
   }
 }
