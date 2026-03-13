@@ -1,7 +1,37 @@
+import { useState } from "react";
+
 export default function App() {
+  const [formData, setFormData] = useState({
+    name: "",
+    organization: "",
+    email: "",
+    campaignType: "Advocacy organization",
+    message: "",
+  });
+  const [formStatus, setFormStatus] = useState("idle"); // idle | sending | sent | error
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormStatus("sending");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setFormStatus("sent");
+        setFormData({ name: "", organization: "", email: "", campaignType: "Advocacy organization", message: "" });
+      } else {
+        setFormStatus("error");
+      }
+    } catch {
+      setFormStatus("error");
+    }
+  };
+
   const nav = [
     { label: "Solutions", href: "#solutions" },
-    { label: "Campaigns", href: "#campaigns" },
     { label: "Features", href: "#features" },
     { label: "About", href: "#about" },
     { label: "Contact", href: "#contact" },
@@ -22,30 +52,6 @@ export default function App() {
       title: "Influence decision-makers",
       body:
         "Help public affairs teams and advocacy groups move concerns into structured policy conversations.",
-    },
-  ];
-
-  const campaigns = [
-    {
-      title: "Protect local jobs and industry",
-      issue:
-        "Coordinate constituent outreach around policies that affect regional employers and workforce stability.",
-      supporters: "18,420",
-      actions: "41,000+",
-    },
-    {
-      title: "Expand access to rural healthcare",
-      issue:
-        "Mobilize communities, patients, and stakeholders to support practical healthcare access reforms.",
-      supporters: "12,180",
-      actions: "27,500+",
-    },
-    {
-      title: "Support housing and infrastructure reform",
-      issue:
-        "Give local organizations a public-facing campaign hub to build support and sustain momentum.",
-      supporters: "24,900",
-      actions: "63,000+",
     },
   ];
 
@@ -132,12 +138,6 @@ export default function App() {
 
           <div className="flex items-center gap-3">
             <a
-              href="#campaigns"
-              className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-white/80 sm:inline-flex"
-            >
-              Explore campaigns
-            </a>
-            <a
               href="#contact"
               className="inline-flex rounded-full bg-[linear-gradient(135deg,#6366F1,#8B5CF6)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(99,102,241,0.22)] transition hover:opacity-95"
             >
@@ -168,10 +168,10 @@ export default function App() {
                   Book a demo
                 </a>
                 <a
-                  href="#campaigns"
+                  href="#solutions"
                   className="inline-flex items-center justify-center rounded-full border border-indigo-100 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-200 hover:text-slate-950"
                 >
-                  Explore campaigns
+                  Learn more
                 </a>
               </div>
               <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
@@ -189,7 +189,7 @@ export default function App() {
                 <div className="rounded-[1.6rem] bg-[linear-gradient(135deg,#ffffff,rgba(244,247,255,0.96))] p-6 ring-1 ring-indigo-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-slate-500">Active campaign</div>
+                      <div className="text-sm font-medium text-slate-500">Example campaign</div>
                       <div className="mt-2 text-2xl font-semibold text-slate-950">Rural Healthcare Access</div>
                     </div>
                     <div className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-600">
@@ -266,53 +266,6 @@ export default function App() {
                 <div className="text-base font-semibold text-slate-900">{solution}</div>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section id="campaigns" className="py-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="max-w-2xl">
-                <div className="text-sm font-semibold uppercase tracking-[0.18em] text-indigo-600">Campaigns</div>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                  Showcase campaigns that look live and ready to mobilize.
-                </h2>
-              </div>
-              <a href="#contact" className="text-sm font-semibold text-slate-700 transition hover:text-slate-950">
-                Launch a campaign →
-              </a>
-            </div>
-
-            <div className="mt-10 grid gap-6 lg:grid-cols-3">
-              {campaigns.map((campaign) => (
-                <div key={campaign.title} className="rounded-[2rem] border border-white/80 bg-white/80 p-6 shadow-[0_12px_35px_rgba(99,102,241,0.08)] transition hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(99,102,241,0.10)] backdrop-blur">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
-                      Featured issue
-                    </span>
-                    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Campaign page</span>
-                  </div>
-                  <h3 className="mt-5 text-2xl font-semibold tracking-tight text-slate-950">{campaign.title}</h3>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">{campaign.issue}</p>
-                  <div className="mt-6 grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Supporters</div>
-                      <div className="mt-2 text-2xl font-semibold text-slate-950">{campaign.supporters}</div>
-                    </div>
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Outreach actions</div>
-                      <div className="mt-2 text-2xl font-semibold text-slate-950">{campaign.actions}</div>
-                    </div>
-                  </div>
-                  <a
-                    href="#contact"
-                    className="mt-6 inline-flex rounded-full border border-indigo-100 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-indigo-200 hover:text-slate-950"
-                  >
-                    View campaign
-                  </a>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -437,25 +390,25 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/80 bg-white/80 p-8 shadow-[0_14px_45px_rgba(99,102,241,0.10)] backdrop-blur">
+            <form onSubmit={handleSubmit} className="rounded-[2rem] border border-white/80 bg-white/80 p-8 shadow-[0_14px_45px_rgba(99,102,241,0.10)] backdrop-blur">
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">Name</span>
-                  <input className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="Your name" />
+                  <input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="Your name" />
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">Organization</span>
-                  <input className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="Organization" />
+                  <input value={formData.organization} onChange={(e) => setFormData({ ...formData, organization: e.target.value })} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="Organization" />
                 </label>
               </div>
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">Email</span>
-                  <input className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="you@organization.ca" />
+                  <input required type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="you@organization.ca" />
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">Campaign type</span>
-                  <select className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300">
+                  <select value={formData.campaignType} onChange={(e) => setFormData({ ...formData, campaignType: e.target.value })} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300">
                     <option>Advocacy organization</option>
                     <option>Association campaign</option>
                     <option>Public affairs / GR</option>
@@ -466,19 +419,25 @@ export default function App() {
               </div>
               <label className="mt-5 block">
                 <span className="mb-2 block text-sm font-medium text-slate-700">What are you trying to influence?</span>
-                <textarea rows={5} className="w-full rounded-[1.5rem] border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="Describe the issue, audience, and campaign objective." />
+                <textarea required rows={5} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full rounded-[1.5rem] border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-300" placeholder="Describe the issue, audience, and campaign objective." />
               </label>
-              <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <p className="max-w-[360px] text-sm leading-7 text-slate-500">
-                  This MVP contact form is presentation-ready
-                  <br />
-                  and can be wired into your CRM later.
-                </p>
-                <button className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[linear-gradient(135deg,#6366F1,#8B5CF6)] px-8 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(99,102,241,0.22)] transition hover:opacity-95">
-                  Talk to us
-                </button>
+              <div className="mt-6 flex items-end justify-end">
+                {formStatus === "sent" ? (
+                  <p className="text-sm font-medium text-green-600">Message sent — we'll be in touch.</p>
+                ) : formStatus === "error" ? (
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm text-red-500">Something went wrong. Please try again.</p>
+                    <button type="submit" className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[linear-gradient(135deg,#6366F1,#8B5CF6)] px-8 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(99,102,241,0.22)] transition hover:opacity-95">
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                  <button type="submit" disabled={formStatus === "sending"} className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[linear-gradient(135deg,#6366F1,#8B5CF6)] px-8 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(99,102,241,0.22)] transition hover:opacity-95 disabled:opacity-60">
+                    {formStatus === "sending" ? "Sending..." : "Talk to us"}
+                  </button>
+                )}
               </div>
-            </div>
+            </form>
           </div>
         </section>
       </main>
