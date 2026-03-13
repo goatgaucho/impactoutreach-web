@@ -51,7 +51,8 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const text = await response.text();
       console.error("Mailgun error:", response.status, text);
-      return res.status(500).json({ error: "Failed to send message", detail: text });
+      console.error("Using domain:", MAILGUN_DOMAIN, "key length:", MAILGUN_API_KEY?.length);
+      return res.status(500).json({ error: "Failed to send message", detail: text, status: response.status });
     }
 
     return res.status(200).json({ success: true });
